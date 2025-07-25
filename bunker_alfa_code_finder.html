@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bunker Alfa Code (2025)</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #121212;
+      color: #f2f2f2;
+      text-align: center;
+      padding: 50px;
+    }
+    .container {
+      background: #1e1e1e;
+      padding: 30px;
+      border-radius: 10px;
+      display: inline-block;
+    }
+    h1 {
+      color: #fda502;
+    }
+    .code {
+      font-size: 1.5em;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Bunker Alfa Code</h1>
+    <p>Today's Date: <span id="today">...</span></p>
+    <p class="code">Code: <span id="code">Loading...</span></p>
+  </div>
+
+  <script>
+    const todaySpan = document.getElementById("today");
+    const codeSpan = document.getElementById("code");
+
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = today.getMonth(); // 0-based
+    const dd = today.getDate();
+
+    const formattedToday = `${yyyy}-${String(mm+1).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
+    todaySpan.textContent = formattedToday;
+
+    const proxyUrl = "https://api.codetabs.com/v1/proxy/?quest=";
+    const targetUrl = "https://last-day-on-earth-survival.fandom.com/wiki/Bunker_Alfa";
+
+    fetch(proxyUrl + encodeURIComponent(targetUrl))
+      .then(res => res.text())
+      .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+        const table = doc.querySelector(".mw-collapsible-content .article-table");
+        if (!table) {
+          codeSpan.textContent = "Code table not found.";
+          return;
+        }
+
+        const headerCells = table.querySelectorAll("tr:nth-child(1) th");
+        let monthIndex = mm + 1; // JavaScript months are 0-indexed
+        let columnIndex = -1;
+
+        // Find the column index for the current month (Jan = 1)
+        headerCells.forEach((th, idx) => {
+          const text = th.textContent.trim().toLowerCase();
+          if (text.startsWith(new Date(yyyy, mm).toLocaleString('default', { month: 'short' }).toLowerCase())) {
+            columnIndex = idx;
+          }
+        });
+
+        if (columnIndex === -1) {
+          codeSpan.textContent = "Month not found in table.";
+          return;
+        }
+
+        const rows = table.querySelectorAll("tr");
+        let code = null;
+
+        rows.forEach((tr, rowIndex) => {
+          const cells = tr.querySelectorAll("td, th");
+          const rowDay = parseInt(cells[0]?.textContent.trim());
+          if (rowDay === dd) {
+            const codeCell = cells[columnIndex];
+            if (codeCell) {
+              code = codeCell.textContent.trim();
+            }
+          }
+        });
+
+        if (code && code !== "--") {
+          codeSpan.textContent = code;
+        } else {
+          codeSpan.textContent = "Code not available for today.";
+        }
+      })
+      .catch(err => {
+        codeSpan.textContent = "Failed to fetch code.";
+        console.error(err);
+      });
+  </script>
+</body>
+</html>
