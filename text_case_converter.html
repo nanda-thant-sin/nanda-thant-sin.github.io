@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Smart Text Case Converter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #121212;
+      color: #f5f5f5;
+      padding: 30px;
+    }
+    h1 {
+      text-align: center;
+      color: #fda502;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      font-size: 1.1em;
+      padding: 10px;
+      margin-top: 15px;
+      border-radius: 5px;
+      border: none;
+      resize: vertical;
+      background: #1e1e1e;
+      color: #f5f5f5;
+    }
+    .format {
+      background: #1e1e1e;
+      margin: 20px 0;
+      padding: 15px;
+      border-radius: 6px;
+      border-left: 5px solid #fda502;
+    }
+    .format h3 {
+      margin: 0 0 10px;
+    }
+    .output {
+      background: #2b2b2b;
+      padding: 10px;
+      border-radius: 4px;
+      font-family: monospace;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+    .copy-btn {
+      margin-top: 10px;
+      background: #fda502;
+      border: none;
+      color: #000;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .copy-btn:hover {
+      background: #ffb733;
+    }
+    #detected {
+      text-align: center;
+      color: #ccc;
+      margin: 15px 0;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <h1>Smart Text Case Converter</h1>
+  <p>Enter text below. Format will be auto-detected and transformed live.</p>
+
+  <textarea id="input" placeholder="Type or paste your text here..."></textarea>
+  <div id="detected">Detecting format...</div>
+  <div id="results"></div>
+
+  <script>
+    const input = document.getElementById("input");
+    const results = document.getElementById("results");
+    const detectedEl = document.getElementById("detected");
+
+    const formats = {
+      UPPERCASE: str => str.toUpperCase(),
+      lowercase: str => str.toLowerCase(),
+      "Title Case": str => str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase()),
+      "Sentence case": str => str.length > 0 ? str[0].toUpperCase() + str.slice(1).toLowerCase() : "",
+      camelCase: str => str.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (m, c) => c.toUpperCase()),
+      PascalCase: str => str.replace(/[^a-zA-Z0-9]+(.)/g, (m, c) => c.toUpperCase()).replace(/^\w/, c => c.toUpperCase()),
+      snake_case: str => str.trim().toLowerCase().replace(/\s+/g, "_"),
+      "kebab-case": str => str.trim().toLowerCase().replace(/\s+/g, "-"),
+      "Studly Case": str => str.split("").map((ch, i) => i % 2 === 0 ? ch.toUpperCase() : ch.toLowerCase()).join(""),
+      "Inverse Case": str => str.split("").map(ch => ch === ch.toUpperCase() ? ch.toLowerCase() : ch.toUpperCase()).join(""),
+      "Capitalize Each Letter": str => str.toUpperCase().split("").join(" ")
+    };
+
+    function detectFormat(str) {
+      if (/^[A-Z]+(\s[A-Z]+)*$/.test(str)) return "UPPERCASE";
+      if (/^[a-z]+(\s[a-z]+)*$/.test(str)) return "lowercase";
+      if (/^[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*$/.test(str)) return "Title Case";
+      if (/^[A-Z][a-z\s]+$/.test(str)) return "Sentence case";
+      if (/^[a-z]+([A-Z][a-z0-9]*)+$/.test(str)) return "camelCase";
+      if (/^[A-Z][a-z0-9]*([A-Z][a-z0-9]*)*$/.test(str)) return "PascalCase";
+      if (/^[a-z0-9]+(_[a-z0-9]+)+$/.test(str)) return "snake_case";
+      if (/^[a-z0-9]+(-[a-z0-9]+)+$/.test(str)) return "kebab-case";
+      if (/^(?:[A-Za-z])(?:[a-z])(?:[A-Za-z])*(?:\s?[A-Za-z])*$/.test(str.replace(/\s+/g, '')) && [...str.replace(/\s+/g, '')].every((c, i) => i % 2 ? c === c.toLowerCase() : c === c.toUpperCase())) return "Studly Case";
+      if ([...str].some((c, i) => (c === c.toLowerCase()) !== (str[i] === str[i].toLowerCase()))) return "Inverse Case";
+      if (/^[A-Za-z](\s[A-Za-z])+$/.test(str.trim())) return "Capitalize Each Letter";
+      return "Unknown/Mixed";
+    }
+
+    function normalize(str, format) {
+      let text = str.trim();
+      switch (format) {
+        case "UPPERCASE":
+        case "lowercase":
+        case "Title Case":
+        case "Sentence case":
+          return text.toLowerCase();
+        case "camelCase":
+        case "PascalCase":
+          return text.replace(/([A-Z])/g, "$1").toLowerCase();
+        case "snake_case":
+          return text.replace(/_/g, " ").toLowerCase();
+        case "kebab-case":
+          return text.replace(/-/g, " ").toLowerCase();
+        case "Studly Case":
+        case "Inverse Case":
+          return text.toLowerCase();
+        case "Capitalize Each Letter":
+          return text.replace(/\s+/g, "").toLowerCase();
+        default:
+          return text;
+      }
+    }
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => alert("Copied!"));
+    }
+
+    function updateOutput() {
+      const raw = input.value;
+      const detected = detectFormat(raw);
+      const normalized = normalize(raw, detected);
+      detectedEl.textContent = `Detected format: ${detected}`;
+
+      results.innerHTML = "";
+      Object.entries(formats).forEach(([label, func]) => {
+        const result = func(normalized);
+        const box = document.createElement("div");
+        box.className = "format";
+        box.innerHTML = `
+          <h3>${label}</h3>
+          <div class="output">${result}</div>
+          <button class="copy-btn" onclick="copyToClipboard(\`${result.replace(/`/g, "\\`")}\`)">Copy</button>
+        `;
+        results.appendChild(box);
+      });
+    }
+
+    input.addEventListener("input", updateOutput);
+    updateOutput();
+  </script>
+</body>
+</html>
