@@ -2,48 +2,82 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Bunker Alfa Code (2025)</title>
+  <title>Bunker Alfa Code Finder (LDoE 2025)</title>
+  <meta name="description" content="Automatically fetches today's Bunker Alfa access code for Last Day on Earth: Survival from the official wiki.">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
       font-family: sans-serif;
       background: #121212;
       color: #f2f2f2;
       text-align: center;
-      padding: 50px;
+      padding: 50px 20px;
     }
     .container {
       background: #1e1e1e;
       padding: 30px;
       border-radius: 10px;
       display: inline-block;
+      max-width: 500px;
+      width: 100%;
     }
     h1 {
       color: #fda502;
+      font-size: 1.8em;
+      margin-bottom: 10px;
     }
-    .code {
-      font-size: 1.5em;
+    p.description {
+      font-size: 1rem;
+      color: #ccc;
+      margin: 10px 0 30px;
+    }
+    #code-box {
       margin-top: 20px;
+      font-size: 1.2em;
+    }
+    .highlight {
+      font-size: 1.8em;
+      font-weight: bold;
+      color: #fda502;
+      margin: 1em 0;
+    }
+    .faded {
+      opacity: 0.6;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Bunker Alfa Code</h1>
-    <p>Today's Date: <span id="today">...</span></p>
-    <p class="code">Code: <span id="code">Loading...</span></p>
+    <h1>Bunker Alfa Code Finder</h1>
+    <div id="code-box">Loading bunker codes...</div>
   </div>
 
   <script>
-    const todaySpan = document.getElementById("today");
-    const codeSpan = document.getElementById("code");
-
     const today = new Date();
     const yyyy = today.getFullYear();
     const mm = today.getMonth(); // 0-based
     const dd = today.getDate();
 
-    const formattedToday = `${yyyy}-${String(mm+1).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
-    todaySpan.textContent = formattedToday;
+    const yesterday = new Date(today);
+    yesterday.setDate(dd - 1);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(dd + 1);
+
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+
+    const getDateInfo = (date) => ({
+      iso: date.toISOString().slice(0, 10),
+      day: date.getDate(),
+      month: date.getMonth(),
+      label: date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
+    });
+
+    const todayInfo = getDateInfo(today);
+    const yesterdayInfo = getDateInfo(yesterday);
+    const tomorrowInfo = getDateInfo(tomorrow);
 
     const proxyUrl = "https://api.codetabs.com/v1/proxy/?quest=";
     const targetUrl = "https://last-day-on-earth-survival.fandom.com/wiki/Bunker_Alfa";
@@ -54,52 +88,56 @@
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, "text/html");
         const table = doc.querySelector(".mw-collapsible-content .article-table");
-        if (!table) {
-          codeSpan.textContent = "Code table not found.";
-          return;
-        }
+        if (!table) return showError("Code table not found.");
 
         const headerCells = table.querySelectorAll("tr:nth-child(1) th");
-        let monthIndex = mm + 1; // JavaScript months are 0-indexed
-        let columnIndex = -1;
-
-        // Find the column index for the current month (Jan = 1)
+        let monthCol = {};
         headerCells.forEach((th, idx) => {
           const text = th.textContent.trim().toLowerCase();
-          if (text.startsWith(new Date(yyyy, mm).toLocaleString('default', { month: 'short' }).toLowerCase())) {
-            columnIndex = idx;
-          }
+          monthNames.forEach((name, i) => {
+            if (text.startsWith(name.slice(0, 3).toLowerCase())) {
+              monthCol[i] = idx;
+            }
+          });
         });
-
-        if (columnIndex === -1) {
-          codeSpan.textContent = "Month not found in table.";
-          return;
-        }
 
         const rows = table.querySelectorAll("tr");
-        let code = null;
+        let codes = {};
 
-        rows.forEach((tr, rowIndex) => {
-          const cells = tr.querySelectorAll("td, th");
-          const rowDay = parseInt(cells[0]?.textContent.trim());
-          if (rowDay === dd) {
-            const codeCell = cells[columnIndex];
-            if (codeCell) {
-              code = codeCell.textContent.trim();
+        [yesterdayInfo, todayInfo, tomorrowInfo].forEach(info => {
+          rows.forEach(tr => {
+            const cells = tr.querySelectorAll("td, th");
+            const rowDay = parseInt(cells[0]?.textContent.trim());
+            if (rowDay === info.day) {
+              const colIndex = monthCol[info.month];
+              if (colIndex && cells[colIndex]) {
+                const code = cells[colIndex].textContent.trim();
+                codes[info.iso] = code !== '--' ? code : 'N/A';
+              }
             }
-          }
+          });
         });
 
-        if (code && code !== "--") {
-          codeSpan.textContent = code;
-        } else {
-          codeSpan.textContent = "Code not available for today.";
-        }
+        document.getElementById("code-box").innerHTML = `
+          <div class="faded">
+            <strong>Yesterday (${yesterdayInfo.label}):</strong> ${codes[yesterdayInfo.iso] || 'N/A'}
+          </div>
+          <div class="highlight">
+            Today (${todayInfo.label}): ${codes[todayInfo.iso] || 'N/A'}
+          </div>
+          <div class="faded">
+            <strong>Tomorrow (${tomorrowInfo.label}):</strong> ${codes[tomorrowInfo.iso] || 'N/A'}
+          </div>
+        `;
       })
       .catch(err => {
-        codeSpan.textContent = "Failed to fetch code.";
+        document.getElementById("code-box").textContent = "Failed to fetch code.";
         console.error(err);
       });
+
+    function showError(msg) {
+      document.getElementById("code-box").textContent = msg;
+    }
   </script>
 </body>
 </html>
