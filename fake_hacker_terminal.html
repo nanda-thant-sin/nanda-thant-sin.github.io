@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hacker Terminal</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: black;
+      color: #00ff00;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 16px;
+      line-height: 1.4;
+      overflow: hidden;
+    }
+    #terminal {
+      padding: 1rem;
+      height: 100vh;
+      white-space: pre-wrap;
+      overflow-y: scroll;
+    }
+    .blinker {
+      display: inline-block;
+      width: 10px;
+      background-color: #00ff00;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink {
+      from, to { background: transparent; }
+      50% { background: #00ff00; }
+    }
+    #inputLine {
+      display: inline;
+    }
+    #restart {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #00ff00;
+      color: black;
+      border: none;
+      padding: 5px 10px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #restart:hover {
+      background: #00cc00;
+    }
+    .glitch {
+      animation: glitch 1s infinite;
+    }
+    @keyframes glitch {
+      0% { text-shadow: 2px 2px red; }
+      20% { text-shadow: -2px 0 blue; }
+      40% { text-shadow: 2px -2px lime; }
+      60% { text-shadow: -1px 1px magenta; }
+      80% { text-shadow: 1px -1px cyan; }
+      100% { text-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <button id="restart">Restart</button>
+  <div id="terminal"></div>
+  <audio id="beep" preload="auto">
+    <source src="audio/typing.mp3" type="audio/mp3">
+  </audio>
+
+  <script>
+    const terminal = document.getElementById('terminal');
+    const beep = document.getElementById('beep');
+    const restartBtn = document.getElementById('restart');
+
+    const fakeLines = [
+      'Booting up secure system...',
+      'Establishing encrypted SSH channel...',
+      'Decrypting credentials...',
+      'Accessing server at 10.0.0.13...',
+      'Username: admin',
+      'Password: ********',
+      'Authentication successful.',
+      'Deploying tracking malware...',
+      'Tracing signal to source...',
+      'Downloading files: ████████░░░░░░ 60%',
+      'Download complete. File saved to /tmp/dump.bin',
+      'Erasing footprints...',
+      'System purge complete.',
+    ];
+
+    let currentLine = 0;
+    const delay = 500;
+    let userInputActive = false;
+
+    function playBeep() {
+      const clone = beep.cloneNode();
+      clone.volume = 0.5;
+      clone.play().catch(() => {});
+    }
+
+    function typeLine(line, index = 0) {
+      if (index < line.length) {
+        terminal.innerHTML += line.charAt(index);
+        playBeep();
+        setTimeout(() => typeLine(line, index + 1), 30);
+      } else {
+        terminal.innerHTML += '\n';
+        terminal.scrollTop = terminal.scrollHeight;
+        setTimeout(printNextLine, delay);
+      }
+    }
+
+    function printNextLine() {
+      if (currentLine < fakeLines.length) {
+        typeLine(fakeLines[currentLine]);
+        currentLine++;
+      } else {
+        startUserInput();
+      }
+    }
+
+    function startUserInput() {
+      if (userInputActive) return;
+      userInputActive = true;
+      const inputPrefix = document.createElement('span');
+      inputPrefix.textContent = 'HACKER@TERMINAL:~$ ';
+      terminal.appendChild(inputPrefix);
+
+      const inputLine = document.createElement('span');
+      inputLine.id = 'inputLine';
+      terminal.appendChild(inputLine);
+
+      const blinker = document.createElement('span');
+      blinker.className = 'blinker';
+      terminal.appendChild(blinker);
+
+      let command = '';
+      document.addEventListener('keydown', function handleKey(e) {
+        if (!userInputActive) return;
+
+        if (e.key.length === 1) {
+          command += e.key;
+          inputLine.textContent = command;
+          inputLine.classList.add('glitch');
+          playBeep();
+          setTimeout(() => inputLine.classList.remove('glitch'), 150);
+        } else if (e.key === 'Backspace') {
+          command = command.slice(0, -1);
+          inputLine.textContent = command;
+        } else if (e.key === 'Enter') {
+          terminal.innerHTML += '\nUnauthorized command: ' + command + '\n';
+          terminal.scrollTop = terminal.scrollHeight;
+          command = '';
+          inputLine.textContent = '';
+        }
+      });
+    }
+
+    function startTerminal() {
+      terminal.innerHTML = '';
+      currentLine = 0;
+      userInputActive = false;
+      printNextLine();
+    }
+
+    restartBtn.addEventListener('click', startTerminal);
+
+    window.addEventListener('click', () => {
+      beep.play().catch(() => {});
+    }, { once: true });
+
+    startTerminal();
+  </script>
+</body>
+</html>
