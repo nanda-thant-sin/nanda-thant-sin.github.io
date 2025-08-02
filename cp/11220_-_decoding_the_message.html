@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="page-title">Problem Title - Competitive Programming Solution</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/cp.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Problem Header -->
+    <h1 id="problem-title">11220 - Decoding the message.</h1>
+    <a id="problem-link" class="problem-link" href="https://onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=24&page=show_problem&problem=2161" target="_blank">View Problem Statement</a>
+
+    <!-- Problem Summary -->
+    <div class="section" id="summary">
+      <h2>Problem Summary</h2>
+      <p>Chico and Maria communicate using a secret code: from each line of their message, the first word gives the first letter, the second word the second letter, and so on. If a word is too short, the next word provides the missing letter. At the end of each line, the current decoded word is completed, and decoding continues from the first letter of the first word in the next line. The task is to decode multiple test cases and output each decoded word on a separate line.</p>
+    </div>
+
+    <!-- Solution Code -->
+    <div class="section" id="solution" data-code="https://raw.githubusercontent.com/nanda-thant-sin/UVA-solutions/refs/heads/master/11220%20-%20Decoding%20the%20message.java">
+      <h2>Solution Code</h2>
+      <pre><code id="code-block" class="language-cpp loading">Loading code from GitHub...</code></pre>
+    </div>
+
+    <!-- Explanation -->
+    <div class="section" id="explanation">
+        <h2>Explanation</h2>
+        <p><strong>Logic Explanation</strong></p>
+        <ol>
+          <li><strong>Read number of test cases</strong><br>
+          - First input line contains <code>T</code> (number of test cases).<br>
+          - <code>br.readLine()</code> reads <code>T</code> and another <code>br.readLine()</code> skips the blank line before the first case.</li>
+          <li><strong>Loop through each test case</strong><br>
+          - Outer loop <code>for (int i = 1; i &lt;= testcase; i++)</code> processes each test case.<br>
+          - Prints <code>Case #i:</code> to mark the start of the case.</li>
+          <li><strong>Read each line of the test case</strong><br>
+          - Inside the <code>while(true)</code> loop, each message line is read until a blank line appears.<br>
+          - Blank line indicates the end of the current test case.</li>
+          <li><strong>Process each line to decode</strong><br>
+          - Split the line into words: <code>String[] s = line.split(" ");</code><br>
+          - Keep track of which letter to pick using <code>index</code>.<br>
+          &nbsp;&nbsp;&nbsp;• First word → pick its 1st letter (index 0)<br>
+          &nbsp;&nbsp;&nbsp;• Second word → pick its 2nd letter (index 1)<br>
+          &nbsp;&nbsp;&nbsp;• Third word → pick its 3rd letter (index 2)<br>
+          - If a word is too short, skip it and continue to the next word.<br>
+          - <code>if (s[j].length() &gt; index)</code> ensures only words long enough are considered.</li>
+          <li><strong>Output decoded word</strong><br>
+          - Each decoded word is printed on its own line.<br>
+          - At the end of the test case, a blank line is printed if there are more test cases.</li>
+        </ol>
+        <p><strong>Key Points</strong><br>
+        - Uses <code>index</code> to track which character position to pick for each word in sequence.<br>
+        - Handles blank lines to separate test cases.<br>
+        - Ensures proper formatting (blank line between test cases).</p>
+      </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="../js/cp.js"></script>
+</body>
+</html>

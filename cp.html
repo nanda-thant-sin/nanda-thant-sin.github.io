@@ -1,0 +1,121 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Competitive Programming Solutions</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #e0f7fa, #e3f2fd);
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 50px auto;
+      padding: 0 20px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2.8rem;
+      margin-bottom: 15px;
+      color: #222;
+    }
+    p {
+      text-align: center;
+      font-size: 1.1rem;
+      color: #555;
+      margin-bottom: 40px;
+    }
+    .solution-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      padding: 0;
+      list-style: none;
+    }
+    .solution-item {
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      padding: 20px;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .solution-item::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, rgba(0,150,255,0.1), rgba(0,255,200,0.1));
+      transform: rotate(25deg);
+      z-index: 0;
+    }
+    .solution-item:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+    }
+    .solution-item a {
+      color: #0077cc;
+      font-size: 1.3rem;
+      text-decoration: none;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 1;
+    }
+    .solution-item a:hover {
+      color: #005fa3;
+    }
+    .solution-desc {
+      font-size: 0.95rem;
+      color: #555;
+      line-height: 1.5;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    .tag {
+      background: #e0f2f1;
+      color: #00796b;
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Competitive Programming Solutions</h1>
+    <p>Browse all the problems I’ve solved, with clean explanations and code fetched directly from GitHub.</p>
+    <ul class="solution-list">
+      <li class="solution-item">
+        <a href="cp/11220_-_decoding_the_message.html">11220 - Decoding the message(UVa Online Judge)</a>
+        <p class="solution-desc">Decode messages using Chico and Maria's secret letter pattern. Java solution with clear explanation.</p>
+        <div class="tags">
+          <span class="tag">String</span>
+          <span class="tag">Simulation</span>
+        </div>
+      </li>
+      <!-- Add more problems here -->
+    </ul>
+  </div>
+</body>
+</html>
